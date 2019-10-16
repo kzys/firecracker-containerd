@@ -14,9 +14,10 @@ package main
 
 import (
 	"encoding/json"
-	"github.com/firecracker-microvm/firecracker-containerd/internal"
 	"os"
 	"testing"
+
+	"github.com/firecracker-microvm/firecracker-containerd/internal"
 )
 
 const runtimeConfigPath = "/etc/containerd/firecracker-runtime.json"
