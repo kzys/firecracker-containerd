@@ -357,11 +357,16 @@ func writeCNIConf(path, chainedPluginName, networkName, nameserver string) error
 func useDefaultNetworkInterfaceRuntimeConfig(t *testing.T) {
 	t.Helper()
 
-	err := os.RemoveAll(runtimeConfigPath)
-	require.NoError(t, err, "failed to remove existing firecracker containerd runtime config file")
-
-	err = os.Symlink(defaultNetworkInterfaceRuntimeConfigPath, runtimeConfigPath)
-	require.NoError(t, err, "failed to symlink default network interface runtime config")
+	writeRuntimeConfig(func(c *Config) {
+		c.DefaultNetworkInterfaces = []proto.FirecrackerNetworkInterface{
+			{
+				CNIConfig: &proto.CNIConfiguration{
+					NetworkName:   "fcnet",
+					InterfaceName: "veth0",
+				},
+			},
+		}
+	})
 }
 
 func runCommand(ctx context.Context, t *testing.T, name string, args ...string) {
