@@ -91,7 +91,7 @@ func iperf3Image(ctx context.Context, client *containerd.Client, snapshotterName
 }
 
 func TestShimExitsUponContainerDelete_Isolated(t *testing.T) {
-	internal.RequiresIsolation(t)
+	prepareIntegTest(t)
 
 	ctx := namespaces.WithNamespace(context.Background(), defaultNamespace)
 
@@ -221,7 +221,7 @@ func createTapDevice(ctx context.Context, tapName string) error {
 }
 
 func TestMultipleVMs_Isolated(t *testing.T) {
-	internal.RequiresIsolation(t)
+	prepareIntegTest(t)
 
 	const (
 		numVMs          = 3
@@ -454,13 +454,14 @@ func TestMultipleVMs_Isolated(t *testing.T) {
 }
 
 func TestLongUnixSocketPath_Isolated(t *testing.T) {
+	prepareIntegTest(t)
+
 	// Verify that if the absolute path of the Firecracker unix sockets are longer
 	// than the max length enforced by the kernel (UNIX_PATH_MAX, usually 108), we
 	// don't fail (due to the internal implementation using relative paths).
 	// We do this by using the max VMID len (76 chars), which in combination with the
 	// default location we store state results in a path like
 	// "/run/firecracker-containerd/default/<vmID>" (with len 112).
-	internal.RequiresIsolation(t)
 	const maxUnixSockLen = 108
 	vmID := strings.Repeat("x", 76)
 
@@ -499,7 +500,8 @@ func TestLongUnixSocketPath_Isolated(t *testing.T) {
 }
 
 func TestStubBlockDevices_Isolated(t *testing.T) {
-	internal.RequiresIsolation(t)
+	prepareIntegTest(t)
+
 	const vmID = 0
 
 	ctx := namespaces.WithNamespace(context.Background(), "default")
@@ -731,7 +733,7 @@ func testCreateContainerWithSameName(t *testing.T, vmID string) {
 }
 
 func TestCreateContainerWithSameName_Isolated(t *testing.T) {
-	internal.RequiresIsolation(t)
+	prepareIntegTest(t)
 
 	testCreateContainerWithSameName(t, "")
 
@@ -740,7 +742,8 @@ func TestCreateContainerWithSameName_Isolated(t *testing.T) {
 }
 
 func TestCreateTooManyContainers_Isolated(t *testing.T) {
-	internal.RequiresIsolation(t)
+	prepareIntegTest(t)
+
 	assert := assert.New(t)
 
 	ctx := namespaces.WithNamespace(context.Background(), "default")

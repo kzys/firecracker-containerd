@@ -39,7 +39,7 @@ import (
 )
 
 func TestCNISupport_Isolated(t *testing.T) {
-	internal.RequiresIsolation(t)
+	prepareIntegTest(t)
 
 	testTimeout := 120 * time.Second
 	ctx, cancel := context.WithTimeout(namespaces.WithNamespace(context.Background(), defaultNamespace), testTimeout)
@@ -133,8 +133,7 @@ func TestCNISupport_Isolated(t *testing.T) {
 }
 
 func TestAutomaticCNISupport_Isolated(t *testing.T) {
-	internal.RequiresIsolation(t)
-	useDefaultNetworkInterfaceRuntimeConfig(t)
+	prepareIntegTest(t, withDefaultNetwork())
 
 	testTimeout := 120 * time.Second
 	ctx, cancel := context.WithTimeout(namespaces.WithNamespace(context.Background(), defaultNamespace), testTimeout)
@@ -200,7 +199,7 @@ func TestAutomaticCNISupport_Isolated(t *testing.T) {
 }
 
 func TestCNIPlugin_Performance(t *testing.T) {
-	internal.RequiresIsolation(t)
+	prepareIntegTest(t)
 
 	numVMs := perfTestVMCount(t)
 	runtimeDuration := perfTestRuntime(t)
@@ -354,10 +353,8 @@ func writeCNIConf(path, chainedPluginName, networkName, nameserver string) error
 }`, networkName, nameserver, chainedPluginName)), 0644)
 }
 
-func useDefaultNetworkInterfaceRuntimeConfig(t *testing.T) {
-	t.Helper()
-
-	writeRuntimeConfig(func(c *Config) {
+func withDefaultNetwork() func(c *Config) {
+	return func(c *Config) {
 		c.DefaultNetworkInterfaces = []proto.FirecrackerNetworkInterface{
 			{
 				CNIConfig: &proto.CNIConfiguration{
@@ -366,7 +363,7 @@ func useDefaultNetworkInterfaceRuntimeConfig(t *testing.T) {
 				},
 			},
 		}
-	})
+	}
 }
 
 func runCommand(ctx context.Context, t *testing.T, name string, args ...string) {

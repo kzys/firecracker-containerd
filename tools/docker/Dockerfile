@@ -163,7 +163,6 @@ RUN make -C /firecracker-containerd/internal test-bridged-tap && \
 	cp /firecracker-containerd/internal/test-bridged-tap /opt/cni/bin/ && \
 	chmod a+x /firecracker-containerd/internal/test-bridged-tap
 
-COPY tools/docker/firecracker-runtime.json /etc/containerd/firecracker-runtime.json
 COPY tools/docker/naive-snapshotter/entrypoint.sh /entrypoint
 
 ENTRYPOINT ["/entrypoint"]

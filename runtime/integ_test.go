@@ -14,7 +14,9 @@ package main
 
 import (
 	"encoding/json"
+	"github.com/firecracker-microvm/firecracker-containerd/internal"
 	"os"
+	"testing"
 )
 
 const runtimeConfigPath = "/etc/containerd/firecracker-runtime.json"
@@ -27,6 +29,17 @@ var defaultRuntimeConfig = Config{
 	CPUCount:              1,
 	CPUTemplate:           "T2",
 	LogLevel:              "Debug",
+}
+
+func prepareIntegTest(t *testing.T, options ...func(*Config)) {
+	t.Helper()
+
+	internal.RequiresIsolation(t)
+
+	err := writeRuntimeConfig(options...)
+	if err != nil {
+		t.Error(err)
+	}
 }
 
 func writeRuntimeConfig(options ...func(*Config)) error {
