@@ -17,7 +17,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -344,26 +343,6 @@ func exposeBlockDeviceToJail(dst string, rdev, uid, gid int) error {
 		return err
 	}
 
-	return nil
-}
-
-func copyFile(src, dst string, mode os.FileMode) error {
-	srcFile, err := os.Open(src)
-	if err != nil {
-		return errors.Wrapf(err, "failed to open %v", src)
-	}
-	defer srcFile.Close()
-
-	dstFile, err := os.OpenFile(dst, os.O_CREATE|os.O_WRONLY|os.O_EXCL, mode)
-	if err != nil {
-		return errors.Wrapf(err, "failed to open %v", dstFile)
-	}
-	defer dstFile.Close()
-
-	_, err = io.Copy(dstFile, srcFile)
-	if err != nil {
-		return errors.Wrap(err, "failed to copy to destination")
-	}
 	return nil
 }
 
