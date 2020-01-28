@@ -1,0 +1,15 @@
+diff --git a/src/vmm/src/default_syscalls/filters.rs b/src/vmm/src/default_syscalls/filters.rs
+index 91c2330..a98c3b5 100644
+--- a/src/vmm/src/default_syscalls/filters.rs
++++ b/src/vmm/src/default_syscalls/filters.rs
+@@ -84,6 +84,10 @@ pub fn default_filter() -> Result<SeccompFilter, Error> {
+             allow_syscall(libc::SYS_read),
+             allow_syscall(libc::SYS_readv),
+             allow_syscall(libc::SYS_recvfrom),
++            // SYS_rt_sigprocmask is called by musl libc, originating in pthread_exit()
++            // https://github.com/firecracker-microvm/firecracker/issues/1456
++            #[cfg(target_env = "musl")]
++            allow_syscall(libc::SYS_rt_sigprocmask),
+             // SYS_rt_sigreturn is needed in case a fault does occur, so that the signal handler
+             // can return. Otherwise we get stuck in a fault loop.
+             allow_syscall(libc::SYS_rt_sigreturn),
