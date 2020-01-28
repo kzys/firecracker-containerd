@@ -290,6 +290,7 @@ tools/firecracker-builder-stamp: tools/docker/Dockerfile.firecracker-builder
 	touch $@
 
 $(FIRECRACKER_BIN) $(JAILER_BIN): $(FIRECRACKER_DIR)/Cargo.toml tools/firecracker-builder-stamp
+	(cd $(FIRECRACKER_DIR) && patch -p1 < $(CURDIR)/vcpu-resume.patch)
 	docker run --rm -it --user $(UID) \
 		--volume $(CURDIR)/$(FIRECRACKER_DIR):/src \
 		--volume $(CARGO_CACHE_VOLUME_NAME):/usr/local/cargo/registry \
