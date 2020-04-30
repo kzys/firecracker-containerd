@@ -188,6 +188,19 @@ func NewService(shimCtx context.Context, id string, remotePublisher shim.Publish
 		logger.Logger.SetLevel(logrus.DebugLevel)
 	}
 
+	wrappedCancel := func() {
+		vmDir:= filepath.Join(cfg.ShimBaseDir, vmID)
+		err := os.RemoveAll(vmDir)
+		if err != nil {
+			logger.WithError(err).Error("Failed to remove vmDir:", vmDir)
+		}
+		nsDir := filepath.Join(cfg.ShimBaseDir, namespace)
+		err = os.RemoveAll(nsDir)
+		if err != nil {
+			logger.WithError(err).Error("Failed to remove nsDir:", nsDir)
+		}
+		shimCancel()
+	}
 	s := &service{
 		taskManager:   vm.NewTaskManager(shimCtx, logger),
 		eventExchange: exchange.NewExchange(),
@@ -195,7 +208,7 @@ func NewService(shimCtx context.Context, id string, remotePublisher shim.Publish
 
 		logger:     logger,
 		shimCtx:    shimCtx,
-		shimCancel: shimCancel,
+		shimCancel: wrappedCancel,
 
 		vmID:    vmID,
 		shimDir: shimDir,
@@ -1150,7 +1163,6 @@ func (s *service) Shutdown(requestCtx context.Context, req *taskAPI.ShutdownRequ
 	if err := s.shutdown(requestCtx, defaultShutdownTimeout, req); err != nil {
 		return &ptypes.Empty{}, err
 	}
-
 	return &ptypes.Empty{}, nil
 }
 
