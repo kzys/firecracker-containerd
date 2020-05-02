@@ -71,7 +71,7 @@ func init() {
 const (
 	defaultVsockPort        = 10789
 	minVsockIOPort          = uint32(11000)
-	firecrackerStartTimeout = 5 * time.Second
+	firecrackerStartTimeout = 90 * time.Second
 	defaultStopVMTimeout    = 5 * time.Second
 	defaultShutdownTimeout  = 5 * time.Second
 	jailerStopTimeout       = 3 * time.Second
