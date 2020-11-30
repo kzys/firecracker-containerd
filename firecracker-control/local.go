@@ -115,7 +115,7 @@ func (s *local) CreateVM(requestCtx context.Context, req *proto.CreateVMRequest)
 	// We determine if there is already a shim managing a VM with the current VMID by attempting
 	// to listen on the abstract socket address (which is parameterized by VMID). If we get
 	// EADDRINUSE, then we assume there is already a shim for the VM and return an AlreadyExists error.
-	shimSocketAddress, err := fcShim.SocketAddress(requestCtx, id)
+	shimSocketAddress, err := shim.SocketAddress(requestCtx, s.containerdAddress, id)
 	if err != nil {
 		err = errors.Wrap(err, "failed to obtain shim socket address")
 		s.logger.WithError(err).Error()
@@ -165,7 +165,7 @@ func (s *local) CreateVM(requestCtx context.Context, req *proto.CreateVMRequest)
 	// containerd does not currently expose the shim server for us to register the fccontrol service with too.
 	// This is likely addressable through some relatively small upstream contributions; the following is a stop-gap
 	// solution until that time.
-	fcSocketAddress, err := fcShim.FCControlSocketAddress(requestCtx, id)
+	fcSocketAddress, err := fcShim.FCControlSocketAddress(requestCtx, s.containerdAddress, id)
 	if err != nil {
 		err = errors.Wrap(err, "failed to obtain shim socket address")
 		s.logger.WithError(err).Error()
@@ -223,14 +223,14 @@ func (s *local) shimFirecrackerClient(requestCtx context.Context, vmID string) (
 		return nil, errors.Wrap(err, "invalid id")
 	}
 
-	socketAddr, err := fcShim.FCControlSocketAddress(requestCtx, vmID)
+	socketAddr, err := fcShim.FCControlSocketAddress(requestCtx, s.containerdAddress, vmID)
 	if err != nil {
 		err = errors.Wrap(err, "failed to get shim's fccontrol socket address")
 		s.logger.WithError(err).Error()
 		return nil, err
 	}
 
-	return fcclient.New("\x00" + socketAddr)
+	return fcclient.New(socketAddr) //
 }
 
 // StopVM stops running VM instance by VM ID. This stops the VM, all tasks within the VM and the runtime shim
@@ -253,7 +253,7 @@ func (s *local) StopVM(requestCtx context.Context, req *proto.StopVMRequest) (*e
 }
 
 func (s *local) waitForShimToExit(ctx context.Context, vmID string) error {
-	socketAddr, err := fcShim.SocketAddress(ctx, vmID)
+	socketAddr, err := shim.SocketAddress(ctx, s.containerdAddress, vmID)
 	if err != nil {
 		return err
 	}
